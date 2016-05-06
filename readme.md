@@ -5,8 +5,11 @@ with minimal overhead.
 
 [![Build Status](https://travis-ci.org/davidmarkclements/async-tracer.svg)](https://travis-ci.org/davidmarkclements/async-tracer)
 
-## Usage
+## Supports
 
+Node v4 to v6
+
+## Usage
 
 ### Write to a stream
 
