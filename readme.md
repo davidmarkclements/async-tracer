@@ -104,6 +104,7 @@ Req/Sec      41901.1 1519.89   42815
 Bytes/Sec    4.64 MB 203.09 kB 4.98 MB
 
 4610k requests in 10s, 51.16 MB read
+```
 
 ### Without tracing
 ```
