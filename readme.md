@@ -5,7 +5,7 @@ with minimal overhead.
 
 [![Build Status](https://travis-ci.org/davidmarkclements/async-tracer.svg)](https://travis-ci.org/davidmarkclements/async-tracer)
 
-## Examples
+## Usage
 
 
 ### Write to a stream
@@ -84,6 +84,11 @@ If set to a number, (from 1 to Infinity) `stacks` will also
 determine the maximum amount of frames to capture for the log
 (defaults to `Infinity` if `true`). 
 
+#### `contexts` [default: `false`] `Boolean`
+
+Supply the operations context in the `pre` and `post` logs. 
+The context is an exposed C object that holds state for the async op.
+
 
 ## Benchmarks
 
@@ -117,6 +122,38 @@ Req/Sec      42968.73 1667.7    44351
 Bytes/Sec    4.75 MB  168.51 kB 4.98 MB
 
 4730k requests in 10s, 52.46 MB read
+```
+
+### Benchmarking Options
+
+The cost of turning `stacks` and `contexts` options on can also be determined with: 
+
+```sh
+npm run benchmark-options
+```
+
+Overhead of enabling context is surprisingly low, 4580k reqs without contexts
+4370k reqs with context - about 5% overhead (profiled on Node 6.1.0, Mac OS X 2013, 2.6ghz i7, 16gb).
+
+However, YMMV based on real world usage. Another consideration of logging contexts is the log file
+size (although compression is likely to be quite effective). 
+
+Overhead of enabling `stacks` is roughly the same as for enabling `contexts`.
+
+## Example
+
+```js
+var http = require('http')
+var fs = require('fs')
+var tracer = require('async-tracer')()
+
+http.createServer(function (req, res) {
+  res.end('hello world')
+}).listen(3000)
+```
+
+```sh
+curl http://localhost:3000
 ```
 
 ## Test

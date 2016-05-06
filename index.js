@@ -2,13 +2,13 @@ var fs = require('fs')
 var wrap = process.binding('async_wrap')
 var pid = process.pid
 var hostname = require('os').hostname()
-
+var util = require('util')
 var mappings = Object.keys(wrap.Providers)
   .reduce(function (o, k) {
    o[wrap.Providers[k]] = k.replace('WRAP', '')
    return o
   }, {})
-
+var stringify = require('json-stringify-safe')
 
 module.exports = function (f, opts) {
   var prepareStackTrace = Error.prepareStackTrace
@@ -27,6 +27,7 @@ module.exports = function (f, opts) {
   var stacks = opts.stacks
   var suffix = opts.suffix
   var prefix = opts.prefix
+  var contexts = opts.contexts
 
   f = f || 1  
 
@@ -81,20 +82,23 @@ module.exports = function (f, opts) {
 
   function init(uid, provider, parentUid, parentHandle) {
     var op = mappings[provider]
-    ops.set(uid, op)
+    var ctx = this
+    ops.set(uid, {op: op, ctx: ctx})
     var parent = parentHandle && 
       parentHandle.constructor.name.toUpperCase().replace('WRAP', '')
     var s = stacks
     write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init"' + (parent ? ',"parentopid":' + parentUid + ',"parentop":"' + parent + '"' : '') + ',"time":' + Date.now() + (s ? ',"stacks":' + stack() : '') + suffix + '}\n')
   }
   function pre(uid) {
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid) + '","phase":"pre","time":' + Date.now() + suffix + '}\n')
+    var ctx = "ctx:" + stringify(ops.get(uid).ctx)
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid).op + '","phase":"pre","time":' + Date.now() + (contexts ? ',' + ctx : '') + suffix + '}\n')
   }
   function post(uid, threw) {
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid) + '","phase":"post"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + suffix + '}\n')
+    var ctx = "ctx:" + stringify(ops.get(uid).ctx)
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid).op + '","phase":"post"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + (contexts ? ',' + ctx : '') + suffix + '}\n')
   }
   function destroy(uid) { 
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid) + '","phase":"destroy","time":' + Date.now() + suffix + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid).op + '","phase":"destroy","time":' + Date.now() + suffix + '}\n')
     ops.delete(uid)
   }
   function stack() {

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "tap test/index.js",
-    "benchmark": "node benchmark"
+    "benchmark": "node benchmark",
+    "benchmark-options": "node benchmark --opts-compare"
   },
   "author": "David Mark Clements",
   "license": "MIT",
@@ -23,5 +24,10 @@
   "bugs": {
     "url": "https://github.com/davidmarkclements/async-tracer/issues"
   },
-  "homepage": "https://github.com/davidmarkclements/async-tracer#readme"
+  "homepage": "https://github.com/davidmarkclements/async-tracer#readme",
+  "dependencies": {
+    "fast-safe-stringify": "^1.0.9",
+    "json-stringify-safe": "^5.0.1",
+    "quick-format": "^2.0.4"
+  }
 }
