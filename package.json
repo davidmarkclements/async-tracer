@@ -1,6 +1,6 @@
 {
   "name": "async-tracer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Trace all async operations, output as newline delimited JSON logs, with minimal overhead.",
   "main": "index.js",
   "scripts": {
