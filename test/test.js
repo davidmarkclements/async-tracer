@@ -5,7 +5,7 @@ const {test} = require('tap')
 const net = require('net')
 const dgram = require('dgram')
 const fs = require('fs')
-const tracer = require('../')('/dev/null', {inject: {some: 'data'}})
+const tracer = require('../')('/dev/null', {suffix: {some: 'data'}, prefix: {other: 'data'}})
 const {parse} = JSON
 
 fs.write = (f, s, cb) => {
@@ -329,11 +329,12 @@ test('fs', ({is, end}) => {
   
 })
 
-test('inject', ({is, end}) => {
+test('prefix & suffix', ({is, end}) => {
   check([
     (s) => {
-      const {some} = parse(s)
+      const {some, other} = parse(s)
       is(some, 'data')
+      is(other, 'data')
       end()
     }
   ])

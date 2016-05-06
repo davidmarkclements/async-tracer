@@ -85,7 +85,7 @@ module.exports = function (f, opts) {
     var parent = parentHandle && 
       parentHandle.constructor.name.toUpperCase().replace('WRAP', '')
     var s = stacks
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init"' + (parent ? '"parentopid":"' + parentUid + ',"parentop":"' + parent + '",' : '') + ',"time":' + Date.now() + (s ? ',"stacks":' + stack() : '') + suffix + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init"' + (parent ? ',"parentopid":' + parentUid + ',"parentop":"' + parent + '"' : '') + ',"time":' + Date.now() + (s ? ',"stacks":' + stack() : '') + suffix + '}\n')
   }
   function pre(uid) {
     write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid) + '","phase":"pre","time":' + Date.now() + suffix + '}\n')
