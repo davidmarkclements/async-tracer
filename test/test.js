@@ -9,7 +9,7 @@ const tracer = require('../')('/dev/null', {suffix: {some: 'data'}, prefix: {oth
 const {parse} = JSON
 const fivePlus = process.versions.node[0] === '6' || process.versions.node[0] === '5'
 const fiveTenPlus = fivePlus && +process.versions.node[2] >= 10
-console.log('BOaua', fiveTenPlus)
+
 fs.write = (f, s, cb) => {
   checker(f, s)
   cb()
