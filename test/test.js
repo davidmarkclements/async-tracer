@@ -247,29 +247,32 @@ test('setTimeout', ({is, end}) => {
   process.nextTick(() => setTimeout(() => {}))
 })
 
-test('threw', ({is, teardown, end}) => {
-  check([
-    null,
-    null,
-    (s) => {
-      const {op, phase, threw} = parse(s)
-      is(op, 'TIMER')
-      is(phase, 'post')
-      is(threw, true)
-      end()
-    }
-  ])
 
-  process.nextTick(() =>
-    domain.create()
-      .on('error', () => {})
-      .run(() => {
-        setTimeout(() => {
-          throw Error()
+if (process.versions.node[0] === '6' || process.versions.node[0] === '5') {
+  test('threw', ({is, teardown, end}) => {
+    check([
+      null,
+      null,
+      (s) => {
+        const {op, phase, threw} = parse(s)
+        is(op, 'TIMER')
+        is(phase, 'post')
+        is(threw, true)
+        end()
+      }
+    ])
+
+    process.nextTick(() =>
+      domain.create()
+        .on('error', () => {})
+        .run(() => {
+          setTimeout(() => {
+            throw Error()
+          })
         })
-      })
-  )
-})
+    )
+  })
+}
 
 test('dgram', ({is, end}) => {
   process.nextTick(() => {

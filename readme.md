@@ -3,6 +3,8 @@
 Trace all async operations, output as newline delimited JSON logs,
 with minimal overhead.
 
+[![Build Status](https://travis-ci.org/davidmarkclements/async-tracer.svg)](https://travis-ci.org/davidmarkclements/async-tracer)
+
 ## Examples
 
 
