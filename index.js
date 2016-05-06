@@ -3,12 +3,12 @@ var wrap = process.binding('async_wrap')
 var pid = process.pid
 var hostname = require('os').hostname()
 var util = require('util')
+var stringify = require('json-stringify-safe')
 var mappings = Object.keys(wrap.Providers)
   .reduce(function (o, k) {
    o[wrap.Providers[k]] = k.replace('WRAP', '')
    return o
   }, {})
-var stringify = require('json-stringify-safe')
 
 module.exports = function (f, opts) {
   var prepareStackTrace = Error.prepareStackTrace
@@ -90,12 +90,14 @@ module.exports = function (f, opts) {
     write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init"' + (parent ? ',"parentopid":' + parentUid + ',"parentop":"' + parent + '"' : '') + ',"time":' + Date.now() + (s ? ',"stacks":' + stack() : '') + suffix + '}\n')
   }
   function pre(uid) {
-    var ctx = "ctx:" + stringify(ops.get(uid).ctx)
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid).op + '","phase":"pre","time":' + Date.now() + (contexts ? ',' + ctx : '') + suffix + '}\n')
+    var state = ops.get(uid)
+    var ctx = "ctx:" + stringify(state.ctx)
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"pre","time":' + Date.now() + (contexts ? ',' + ctx : '') + suffix + '}\n')
   }
   function post(uid, threw) {
-    var ctx = "ctx:" + stringify(ops.get(uid).ctx)
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid).op + '","phase":"post"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + (contexts ? ',' + ctx : '') + suffix + '}\n')
+    var state = ops.get(uid)
+    var ctx = "ctx:" + stringify(state.ctx)
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"post"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + (contexts ? ',' + ctx : '') + suffix + '}\n')
   }
   function destroy(uid) { 
     write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid).op + '","phase":"destroy","time":' + Date.now() + suffix + '}\n')
