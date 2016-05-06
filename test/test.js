@@ -7,7 +7,7 @@ const dgram = require('dgram')
 const fs = require('fs')
 const tracer = require('../')('/dev/null', {suffix: {some: 'data'}, prefix: {other: 'data'}})
 const {parse} = JSON
-
+const fivePlus = process.versions.node[0] === '6' || process.versions.node[0] === '5'
 fs.write = (f, s, cb) => {
   checker(f, s)
   cb()
@@ -248,7 +248,7 @@ test('setTimeout', ({is, end}) => {
 })
 
 
-if (process.versions.node[0] === '6' || process.versions.node[0] === '5') {
+if (fivePlus) {
   test('threw', ({is, teardown, end}) => {
     check([
       null,
@@ -303,7 +303,7 @@ test('fs', ({is, end}) => {
   })
 
   check([
-    null, //ignore tap timer
+    null, //ignore stray timer op in 5+
     (s) => {
       const {op, phase} = parse(s)
       is(op, 'FSREQ')
@@ -325,7 +325,7 @@ test('fs', ({is, end}) => {
       is(phase, 'destroy')
       end()
     }
-  ])
+  ].slice(fivePlus ? 0 : 1))
   
 })
 

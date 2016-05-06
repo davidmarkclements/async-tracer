@@ -22,6 +22,7 @@ module.exports = function (f, opts) {
   }
 
   opts = opts || {}
+  var legacy = false
   var autostart = opts.autostart
   var append = opts.append
   var stacks = opts.stacks
@@ -59,6 +60,7 @@ module.exports = function (f, opts) {
   try { 
     wrap.setupHooks({init: init, pre: pre, post: post, destroy: destroy})
   } catch(e) {
+    legacy = true
     wrap.setupHooks(init, pre, post, destroy)
   }
   
@@ -76,13 +78,19 @@ module.exports = function (f, opts) {
     if (f.pipe && f.cork) {
       f.write(s, enable)
     } else {
-      fs.write(f, s, enable)      
+      fs.write(f, s + '', enable)
     }
   }
 
   function init(uid, provider, parentUid, parentHandle) {
+    if (legacy) {
+      Object.defineProperty(this, '_legacy_uid', {value: provider})
+      provider = uid
+      uid = this._legacy_uid
+    }
+
     var op = mappings[provider]
-    var ctx = this
+    var ctx = contexts ? this : null
     ops.set(uid, {op: op, ctx: ctx})
     var parent = parentHandle && 
       parentHandle.constructor.name.toUpperCase().replace('WRAP', '')
@@ -90,19 +98,23 @@ module.exports = function (f, opts) {
     write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init"' + (parent ? ',"parentopid":' + parentUid + ',"parentop":"' + parent + '"' : '') + ',"time":' + Date.now() + (s ? ',"stacks":' + stack() : '') + suffix + '}\n')
   }
   function pre(uid) {
+    uid = uid || this._legacy_uid
     var state = ops.get(uid)
-    var ctx = "ctx:" + stringify(state.ctx)
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"pre","time":' + Date.now() + (contexts ? ',' + ctx : '') + suffix + '}\n')
+    var ctx = state.ctx
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"pre","time":' + Date.now() + (ctx ? ",ctx:" + stringify(ctx) : '') + suffix + '}\n')
   }
   function post(uid, threw) {
+    uid = uid || this._legacy_uid
     var state = ops.get(uid)
-    var ctx = "ctx:" + stringify(state.ctx)
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"post"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + (contexts ? ',' + ctx : '') + suffix + '}\n')
+    var ctx = state.ctx
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"post"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + (ctx ? ",ctx:" + stringify(ctx) : '') + suffix + '}\n')
   }
   function destroy(uid) { 
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid).op + '","phase":"destroy","time":' + Date.now() + suffix + '}\n')
+    var state = ops.get(uid)
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"destroy","time":' + Date.now() + suffix + '}\n')
     ops.delete(uid)
   }
+  
   function stack() {
     Error.prepareStackTrace = function (s, frames) {
       var stacks = '['
