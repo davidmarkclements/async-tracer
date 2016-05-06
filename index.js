@@ -9,6 +9,11 @@ var mappings = Object.keys(wrap.Providers)
    o[wrap.Providers[k]] = k.replace('WRAP', '')
    return o
   }, {})
+var areaMap = [
+  'misc','crypto','fs','fs','dns','dns','http','stream','stream','stream',
+  'process','dns','stream','process','fs','net','net','timers','tls','tty',
+  'dgram','dgram','stream','zlib'
+]
 
 module.exports = function (f, opts) {
   var prepareStackTrace = Error.prepareStackTrace
@@ -60,7 +65,7 @@ module.exports = function (f, opts) {
   try { 
     wrap.setupHooks({init: init, pre: pre, post: post, destroy: destroy})
   } catch(e) {
-    legacy = true
+    legacy = (process.version[1] !== '5') //covers 5.9.1 down to 5, 4 and below is legacy
     wrap.setupHooks(init, pre, post, destroy)
   }
   
@@ -90,28 +95,29 @@ module.exports = function (f, opts) {
     }
 
     var op = mappings[provider]
+    var area = areaMap[provider]
     var ctx = contexts ? this : null
-    ops.set(uid, {op: op, ctx: ctx})
+    ops.set(uid, {op: op, ctx: ctx, area: area})
     var parent = parentHandle && 
       parentHandle.constructor.name.toUpperCase().replace('WRAP', '')
     var s = stacks
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init"' + (parent ? ',"parentopid":' + parentUid + ',"parentop":"' + parent + '"' : '') + ',"time":' + Date.now() + (s ? ',"stacks":' + stack() : '') + suffix + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init","area":"' + area + '"' + (parent ? ',"parentopid":' + parentUid + ',"parentop":"' + parent + '"' : '') + ',"time":' + Date.now() + (s ? ',"stacks":' + stack() : '') + suffix + '}\n')
   }
   function pre(uid) {
     uid = uid || this._legacy_uid
     var state = ops.get(uid)
     var ctx = state.ctx
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"pre","time":' + Date.now() + (ctx ? ",ctx:" + stringify(ctx) : '') + suffix + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"pre","area":"' + state.area + '","time":' + Date.now() + (ctx ? ",ctx:" + stringify(ctx) : '') + suffix + '}\n')
   }
   function post(uid, threw) {
     uid = uid || this._legacy_uid
     var state = ops.get(uid)
     var ctx = state.ctx
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"post"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + (ctx ? ",ctx:" + stringify(ctx) : '') + suffix + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"post","area":"' + state.area + '"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + (ctx ? ",ctx:" + stringify(ctx) : '') + suffix + '}\n')
   }
   function destroy(uid) { 
     var state = ops.get(uid)
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"destroy","time":' + Date.now() + suffix + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"destroy","area":"' + state.area + '","time":' + Date.now() + suffix + '}\n')
     ops.delete(uid)
   }
   

@@ -8,6 +8,8 @@ const fs = require('fs')
 const tracer = require('../')('/dev/null', {suffix: {some: 'data'}, prefix: {other: 'data'}})
 const {parse} = JSON
 const fivePlus = process.versions.node[0] === '6' || process.versions.node[0] === '5'
+const fiveTenPlus = fivePlus && +process.versions.node[2] >= 10
+console.log('BOaua', fiveTenPlus)
 fs.write = (f, s, cb) => {
   checker(f, s)
   cb()
@@ -248,7 +250,7 @@ test('setTimeout', ({is, end}) => {
 })
 
 
-if (fivePlus) {
+if (fiveTenPlus) {
   test('threw', ({is, teardown, end}) => {
     check([
       null,
@@ -325,7 +327,7 @@ test('fs', ({is, end}) => {
       is(phase, 'destroy')
       end()
     }
-  ].slice(fivePlus ? 0 : 1))
+  ].slice(fiveTenPlus ? 0 : 1))
   
 })
 
