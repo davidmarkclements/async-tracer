@@ -2,7 +2,7 @@
 
 var http = require('http')
 var fs = require('fs')
-var tracer = require('../')(fs.createWriteStream('/dev/null'))
+var tracer = require('../')(process.stdout)
 var server = http.createServer(handle)
 
 function handle (req, res) {

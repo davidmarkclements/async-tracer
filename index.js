@@ -14,11 +14,19 @@ module.exports = function (f, opts) {
   var prepareStackTrace = Error.prepareStackTrace
   var stackTraceLimit = Error.stackTraceLimit
 
+  if (typeof f === 'object') {
+    if (!f.pipe || !f.cork) {
+      opts = f
+      f = null
+    }
+  }
+
   opts = opts || {}
   var autostart = opts.autostart
   var append = opts.append
   var stacks = opts.stacks
-  var inject = opts.inject || ''
+  var suffix = opts.suffix
+  var prefix = opts.prefix
 
   f = f || 1  
 
@@ -26,11 +34,18 @@ module.exports = function (f, opts) {
     autostart = true
   }
 
-  if (typeof inject === 'object') {
-    inject = JSON.stringify(opts.inject)
-    inject = ',' + inject.substring(1, inject.length - 1)
+  if (typeof prefix === 'object') {
+    prefix = JSON.stringify(opts.prefix)
+    prefix = prefix.substring(1, prefix.length - 1) + ','
   } else {
-    inject = ''
+    prefix = ''
+  }
+
+  if (typeof suffix === 'object') {
+    suffix = JSON.stringify(opts.suffix)
+    suffix = ',' + suffix.substring(1, suffix.length - 1)
+  } else {
+    suffix = ''
   }
 
   if (typeof f === 'string') {
@@ -70,16 +85,16 @@ module.exports = function (f, opts) {
     var parent = parentHandle && 
       parentHandle.constructor.name.toUpperCase().replace('WRAP', '')
     var s = stacks
-    write('{"op":"' + op + '",' + (parent ? '"parentOp":"' + parent + '",' : '') + '"phase":"init"' + ',"pid":' + pid + ',"hostname":"' + hostname + '","time":' + Date.now() + (s ? ',"stacks":' + stack() : '') + inject + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init"' + (parent ? '"parentopid":"' + parentUid + ',"parentop":"' + parent + '",' : '') + ',"time":' + Date.now() + (s ? ',"stacks":' + stack() : '') + suffix + '}\n')
   }
   function pre(uid) {
-    write('{"op":"' + ops.get(uid) + '","phase":"pre","pid":' + pid + ',"hostname":"' + hostname + '","time":' + Date.now() + inject + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid) + '","phase":"pre","time":' + Date.now() + suffix + '}\n')
   }
   function post(uid, threw) {
-    write('{"op":"' + ops.get(uid) + '","phase":"post"' + (threw ? ',"threw":' + threw : '') + ',"pid":' + pid + ',"hostname":"' + hostname + '","time":' + Date.now() + inject + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid) + '","phase":"post"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + suffix + '}\n')
   }
   function destroy(uid) { 
-    write('{"op":"' + ops.get(uid) + '","phase":"destroy","pid":' + pid + ',"hostname":"' + hostname + '","time":' + Date.now() + inject + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + ops.get(uid) + '","phase":"destroy","time":' + Date.now() + suffix + '}\n')
     ops.delete(uid)
   }
   function stack() {
@@ -98,7 +113,7 @@ module.exports = function (f, opts) {
 
       return stacks + ']'
     }
-    Error.stackTraceLimit = Infinity
+    Error.stackTraceLimit = typeof stacks === 'number' ? stacks + 3 : Infinity
     var s = Error().stack
     Error.prepareStackTrace = prepareStackTrace
     return s

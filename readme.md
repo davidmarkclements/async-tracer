@@ -63,11 +63,15 @@ Begin tracing immediately
 Only applies to when a path is supplied, opens file with `a` flag
 instead of `w` flag.
 
-#### `inject` [default: `undefined`] `Object`
+#### `prefix` [default: `undefined`] `Object`
 
-Additional data to attach to each log message.
+Additional data to attach to the beginning of each log message.
 
-#### `stacks` [default: `false`] `Boolean`
+#### `suffix` [default: `undefined`] `Object`
+
+Additional data to attach to the end of each log message.
+
+#### `stacks` [default: `false`] `Boolean` or `Number`
 
 If `true` then include an array of call sites in
 each `init` log. The stacks array takes the following form:
@@ -75,6 +79,11 @@ each `init` log. The stacks array takes the following form:
 ```
 ["functionName:fileName:lineNum:colNum"]
 ```
+
+If set to a number, (from 1 to Infinity) `stacks` will also
+determine the maximum amount of frames to capture for the log
+(defaults to `Infinity` if `true`). 
+
 
 ## Benchmarks
 
@@ -84,27 +93,29 @@ Overhead of using `async-tracer` is minimal
 npm run benchmark
 ```
 
+### With tracing
 ```
-Profiling traced server for 10 seconds
+Running 10s test @ http://localhost:3000
+10 connections with 10 pipelining factor
+
+Stat         Avg     Stdev     Max
+Latency (ms) 0.19    0.59      33
+Req/Sec      41901.1 1519.89   42815
+Bytes/Sec    4.64 MB 203.09 kB 4.98 MB
+
+4610k requests in 10s, 51.16 MB read
+
+### Without tracing
+```
 Running 10s test @ http://localhost:3000
 10 connections with 10 pipelining factor
 
 Stat         Avg      Stdev     Max
-Latency (ms) 0.21     0.65      36
-Req/Sec      38101.82 1252.42   39327
-Bytes/Sec    4.25 MB  141.99 kB 4.46 MB
+Latency (ms) 0.17     0.55      38
+Req/Sec      42968.73 1667.7    44351
+Bytes/Sec    4.75 MB  168.51 kB 4.98 MB
 
-4190k requests in 10s, 46.52 MB read
-Profiling control server for 10 seconds
-Running 10s test @ http://localhost:3000
-10 connections with 10 pipelining factor
-
-Stat         Avg      Stdev     Max
-Latency (ms) 0.18     0.58      35
-Req/Sec      41098.19 1571.58   42783
-Bytes/Sec    4.57 MB  193.79 kB 4.98 MB
-
-4520k requests in 10s, 50.18 MB read
+4730k requests in 10s, 52.46 MB read
 ```
 
 ## Test
