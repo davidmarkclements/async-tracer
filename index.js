@@ -65,7 +65,8 @@ module.exports = function (f, opts) {
   try { 
     wrap.setupHooks({init: init, pre: pre, post: post, destroy: destroy})
   } catch(e) {
-    legacy = (process.version[1] !== '5') //covers 5.9.1 down to 5, 4 and below is legacy
+    // covers 5.9.1 down to 5, 4 and below is legacy
+    legacy = (process.version[1] !== '5')
     wrap.setupHooks(init, pre, post, destroy)
   }
   
