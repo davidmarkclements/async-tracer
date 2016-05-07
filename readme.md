@@ -77,7 +77,7 @@ Additional data to attach to the end of each log message.
 #### `stacks` [default: `false`] `Boolean` or `Number`
 
 If `true` then include an array of call sites in
-each `init` log. The stacks array takes the following form:
+each `init` log. The stack array takes the following form:
 
 ```
 ["functionName:fileName:lineNum:colNum"]

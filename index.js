@@ -102,7 +102,7 @@ module.exports = function (f, opts) {
     var parent = parentHandle && 
       parentHandle.constructor.name.toUpperCase().replace('WRAP', '')
     var s = stacks
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init","area":"' + area + '"' + (parent ? ',"parentopid":' + parentUid + ',"parentop":"' + parent + '"' : '') + ',"time":' + Date.now() + (s ? ',"stacks":' + stack() : '') + suffix + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init","area":"' + area + '"' + (parent ? ',"parentopid":' + parentUid + ',"parentop":"' + parent + '"' : '') + ',"time":' + Date.now() + (s ? ',"stack":' + stack() : '') + suffix + '}\n')
   }
   function pre(uid) {
     uid = uid || this._legacy_uid
