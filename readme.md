@@ -77,7 +77,7 @@ Additional data to attach to the end of each log message.
 #### `stacks` [default: `false`] `Boolean` or `Number`
 
 If `true` then include an array of call sites in
-each `init` log. The stack array takes the following form:
+each `init` log, as the `stack` property. The stack array takes the following form:
 
 ```
 ["functionName:fileName:lineNum:colNum"]
@@ -89,7 +89,7 @@ determine the maximum amount of frames to capture for the log
 
 #### `contexts` [default: `false`] `Boolean`
 
-Supply the operations context in the `pre` and `post` logs. 
+Supply the operations context in the `pre` and `post` logs as the `ctx` property. 
 The context is an exposed C object that holds state for the async op.
 
 
