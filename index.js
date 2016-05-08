@@ -108,13 +108,13 @@ module.exports = function (f, opts) {
     uid = uid || this._legacy_uid
     var state = ops.get(uid)
     var ctx = state.ctx
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"pre","area":"' + state.area + '","time":' + Date.now() + (ctx ? ",ctx:" + stringify(ctx) : '') + suffix + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"pre","area":"' + state.area + '","time":' + Date.now() + (ctx ? ',"ctx":' + stringify(ctx) : '') + suffix + '}\n')
   }
   function post(uid, threw) {
     uid = uid || this._legacy_uid
     var state = ops.get(uid)
     var ctx = state.ctx
-    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"post","area":"' + state.area + '"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + (ctx ? ",ctx:" + stringify(ctx) : '') + suffix + '}\n')
+    write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"post","area":"' + state.area + '"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + (ctx ? ',"ctx":' + stringify(ctx) : '') + suffix + '}\n')
   }
   function destroy(uid) { 
     var state = ops.get(uid)
