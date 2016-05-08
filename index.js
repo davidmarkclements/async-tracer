@@ -1,18 +1,15 @@
 var fs = require('fs')
 var wrap = process.binding('async_wrap')
-var pid = process.pid
-var hostname = require('os').hostname()
-var util = require('util')
 var stringify = require('json-stringify-safe')
 var mappings = Object.keys(wrap.Providers)
   .reduce(function (o, k) {
-   o[wrap.Providers[k]] = k.replace('WRAP', '')
-   return o
+    o[wrap.Providers[k]] = k.replace('WRAP', '')
+    return o
   }, {})
 var areaMap = [
-  'misc','crypto','fs','fs','dns','dns','http','stream','stream','stream',
-  'process','dns','stream','process','fs','net','net','timers','tls','tty',
-  'dgram','dgram','stream','zlib'
+  'misc', 'crypto', 'fs', 'fs', 'dns', 'dns', 'http', 'stream', 'stream', 'stream',
+  'process', 'dns', 'stream', 'process', 'fs', 'net', 'net', 'timers', 'tls', 'tty',
+  'dgram', 'dgram', 'stream', 'zlib'
 ]
 
 module.exports = function (f, opts) {
@@ -35,7 +32,7 @@ module.exports = function (f, opts) {
   var prefix = opts.prefix
   var contexts = opts.contexts
 
-  f = f || 1  
+  f = f || 1
 
   if (typeof autostart === 'undefined') {
     autostart = true
@@ -58,28 +55,26 @@ module.exports = function (f, opts) {
   if (typeof f === 'string') {
     f = fs.openSync(f, append ? 'a' : 'w')
   }
-  var ops = new Map
+  var ops = new Map()
   var enable = function () { wrap.enable() }
   var disable = function () { wrap.disable() }
 
-  try { 
+  try {
     wrap.setupHooks({init: init, pre: pre, post: post, destroy: destroy})
-  } catch(e) {
+  } catch (e) {
     // covers 5.9.1 down to 5, 4 and below is legacy
     legacy = (process.version[1] !== '5')
     wrap.setupHooks(init, pre, post, destroy)
   }
-  
-  if (autostart) { enable() }
 
-  var writing = false
+  if (autostart) { enable() }
 
   return {
     enable: enable,
     disable: disable
   }
 
-  function write(s) {
+  function write (s) {
     disable()
     if (f.pipe && f.cork) {
       f.write(s, enable)
@@ -88,7 +83,7 @@ module.exports = function (f, opts) {
     }
   }
 
-  function init(uid, provider, parentUid, parentHandle) {
+  function init (uid, provider, parentUid, parentHandle) {
     if (legacy) {
       Object.defineProperty(this, '_legacy_uid', {value: provider})
       provider = uid
@@ -99,30 +94,30 @@ module.exports = function (f, opts) {
     var area = areaMap[provider]
     var ctx = contexts ? this : null
     ops.set(uid, {op: op, ctx: ctx, area: area})
-    var parent = parentHandle && 
+    var parent = parentHandle &&
       parentHandle.constructor.name.toUpperCase().replace('WRAP', '')
     var s = stacks
     write('{' + prefix + '"opid":' + uid + ',"op":"' + op + '",' + '"phase":"init","area":"' + area + '"' + (parent ? ',"parentopid":' + parentUid + ',"parentop":"' + parent + '"' : '') + ',"time":' + Date.now() + (s ? ',"stack":' + stack() : '') + suffix + '}\n')
   }
-  function pre(uid) {
+  function pre (uid) {
     uid = uid || this._legacy_uid
     var state = ops.get(uid)
     var ctx = state.ctx
     write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"pre","area":"' + state.area + '","time":' + Date.now() + (ctx ? ',"ctx":' + stringify(ctx) : '') + suffix + '}\n')
   }
-  function post(uid, threw) {
+  function post (uid, threw) {
     uid = uid || this._legacy_uid
     var state = ops.get(uid)
     var ctx = state.ctx
     write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"post","area":"' + state.area + '"' + (threw ? ',"threw":' + threw : '') + ',"time":' + Date.now() + (ctx ? ',"ctx":' + stringify(ctx) : '') + suffix + '}\n')
   }
-  function destroy(uid) { 
+  function destroy (uid) {
     var state = ops.get(uid)
     write('{' + prefix + '"opid":' + uid + ',"op":"' + state.op + '","phase":"destroy","area":"' + state.area + '","time":' + Date.now() + suffix + '}\n')
     ops.delete(uid)
   }
-  
-  function stack() {
+
+  function stack () {
     Error.prepareStackTrace = function (s, frames) {
       var stacks = '['
       var f
@@ -131,7 +126,7 @@ module.exports = function (f, opts) {
 
       for (i; i < len; i++) {
         f = frames[i]
-        stacks += '"' + (f.getFunctionName() || f.getMethodName() || '') + ':' + 
+        stacks += '"' + (f.getFunctionName() || f.getMethodName() || '') + ':' +
           f.getFileName() + ':' + f.getLineNumber() + ':' + f.getColumnNumber() + '"' +
           (i === len - 1 ? '' : ',')
       }
@@ -141,8 +136,7 @@ module.exports = function (f, opts) {
     Error.stackTraceLimit = typeof stacks === 'number' ? stacks + 3 : Infinity
     var s = Error().stack
     Error.prepareStackTrace = prepareStackTrace
+    Error.stackTraceLimit = stackTraceLimit
     return s
   }
-
-
 }

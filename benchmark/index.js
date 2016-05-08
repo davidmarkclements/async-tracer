@@ -6,11 +6,9 @@ var flags = [
 ]
 var opts = {stdio: 'inherit'}
 
-
-
-var queue = (~process.argv.indexOf('--opts-compare')) ?
-  [bench('traced-contexts', 'traced-contexts-server'), bench('traced-stacks', 'traced-stacks-server'), bench('traced', 'traced-server')] :
-  [bench('traced', 'traced-server'), bench('control', 'server')]
+var queue = (~process.argv.indexOf('--opts-compare'))
+  ? [bench('traced-contexts', 'traced-contexts-server'), bench('traced-stacks', 'traced-stacks-server'), bench('traced', 'traced-server')]
+  : [bench('traced', 'traced-server'), bench('control', 'server')]
 
 queue.shift()()
 
@@ -28,7 +26,3 @@ function bench (name, file) {
       })
   }
 }
-
-
-
-

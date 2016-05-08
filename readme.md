@@ -147,8 +147,7 @@ Overhead of enabling `stacks` is roughly the same as for enabling `contexts`.
 
 ```js
 var http = require('http')
-var fs = require('fs')
-var tracer = require('async-tracer')()
+require('async-tracer')()
 
 http.createServer(function (req, res) {
   res.end('hello world')

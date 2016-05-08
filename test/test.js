@@ -5,10 +5,18 @@ const {test} = require('tap')
 const net = require('net')
 const dgram = require('dgram')
 const fs = require('fs')
-const tracer = require('../')('/dev/null', {suffix: {some: 'data'}, prefix: {other: 'data'}})
 const {parse} = JSON
 const fivePlus = process.versions.node[0] === '6' || process.versions.node[0] === '5'
 const fiveTenPlus = fivePlus && +process.versions.node[2] >= 10
+
+const tracer = require('../')
+
+tracer('/dev/null', {
+  suffix: {some: 'data'},
+  prefix: {other: 'data'},
+  stacks: true,
+  contexts: true
+})
 
 fs.write = (f, s, cb) => {
   checker(f, s)
@@ -30,7 +38,6 @@ const check = (fn) => {
 }
 
 test('net', ({is, end}) => {
-  
   process.nextTick(() => {
     const server = net.createServer((s) => {
       s.end()
@@ -46,8 +53,7 @@ test('net', ({is, end}) => {
     })
   })
 
-
-  check([ 
+  check([
     (s) => {
       const {op, phase} = parse(s)
       is(op, 'TCP')
@@ -218,7 +224,7 @@ test('net', ({is, end}) => {
       is(op, 'TCP')
       is(phase, 'destroy')
       end()
-    } 
+    }
   ])
 })
 
@@ -248,7 +254,6 @@ test('setTimeout', ({is, end}) => {
   ])
   process.nextTick(() => setTimeout(() => {}))
 })
-
 
 if (fiveTenPlus) {
   test('threw', ({is, teardown, end}) => {
@@ -296,16 +301,15 @@ test('dgram', ({is, end}) => {
       end()
     }
   ])
-
 })
 
 test('fs', ({is, end}) => {
   process.nextTick(() => {
-    fs.stat('/dev/random', () => { })  
+    fs.stat('/dev/random', () => { })
   })
 
   check([
-    null, //ignore stray timer op in 5+
+    null, // ignore stray timer op in 5+
     (s) => {
       const {op, phase} = parse(s)
       is(op, 'FSREQ')
@@ -328,7 +332,6 @@ test('fs', ({is, end}) => {
       end()
     }
   ].slice(fiveTenPlus ? 0 : 1))
-  
 })
 
 test('prefix & suffix', ({is, end}) => {
@@ -342,9 +345,56 @@ test('prefix & suffix', ({is, end}) => {
   ])
 
   process.nextTick(() => {
-    setTimeout(()=> {})  
+    setTimeout(() => {})
   })
-  
+})
 
+test('opts.stacks', ({is, end}) => {
+  check([
+    (s) => {
+      const {some, other} = parse(s)
+      is(some, 'data')
+      is(other, 'data')
+      end()
+    }
+  ])
+
+  process.nextTick(() => {
+    setTimeout(() => {})
+  })
+})
+
+test('opts.stacks', ({is, ok, end}) => {
+  check([
+    null,
+    (s) => {
+      const {phase, stack} = parse(s)
+      is(phase, 'init')
+      ok(stack)
+      end()
+    }
+  ])
+  process.nextTick(() => {
+    setTimeout(() => {})
+  })
+})
+
+test('opts.context', ({is, ok, end}) => {
+  check([
+    (s) => {
+      const {phase, ctx} = parse(s)
+      is(phase, 'pre')
+      ok(ctx)
+    },
+    (s) => {
+      const {phase, ctx} = parse(s)
+      is(phase, 'post')
+      ok(ctx)
+      end()
+    }
+  ])
+  process.nextTick(() => {
+    setTimeout(() => {})
+  })
 })
 

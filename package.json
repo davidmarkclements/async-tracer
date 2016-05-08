@@ -4,7 +4,7 @@
   "description": "Trace all async operations, output as newline delimited JSON logs, with minimal overhead.",
   "main": "index.js",
   "scripts": {
-    "test": "tap test/index.js",
+    "test": "standard && tap test/index.js",
     "benchmark": "node benchmark",
     "benchmark-options": "node benchmark --opts-compare"
   },
@@ -12,6 +12,7 @@
   "license": "MIT",
   "devDependencies": {
     "autocannon": "^0.4.0",
+    "standard": "^7.0.1",
     "tap": "^5.7.1"
   },
   "directories": {

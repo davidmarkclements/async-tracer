@@ -1,6 +1,5 @@
 var http = require('http')
-var fs = require('fs')
-var tracer = require('./')()
+require('./')()
 
 http.createServer(function (req, res) {
   res.end('hello world')
