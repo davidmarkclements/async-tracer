@@ -75,12 +75,16 @@ module.exports = function (f, opts) {
   }
 
   function write (s) {
-    disable()
-    if (f.pipe && f.cork) {
-      f.write(s, enable)
-    } else {
-      fs.write(f, s + '', enable)
-    }
+    if (f.uncork) { f.uncork() }
+    process.nextTick(function () {
+      disable()
+      if (f.pipe && f.cork) {
+        f.cork()
+        f.write(s, enable)
+      } else {
+        fs.write(f, s + '', enable)
+      }
+    })
   }
 
   function init (uid, provider, parentUid, parentHandle) {

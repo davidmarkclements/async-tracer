@@ -349,7 +349,7 @@ test('prefix & suffix', ({is, end}) => {
   })
 })
 
-test('opts.stacks', ({is, end}) => {
+test('prefix & suffix', ({is, end}) => {
   check([
     (s) => {
       const {some, other} = parse(s)
@@ -364,37 +364,36 @@ test('opts.stacks', ({is, end}) => {
   })
 })
 
-test('opts.stacks', ({is, ok, end}) => {
-  check([
-    null,
-    (s) => {
-      const {phase, stack} = parse(s)
-      is(phase, 'init')
-      ok(stack)
-      end()
-    }
-  ])
-  process.nextTick(() => {
-    setTimeout(() => {})
-  })
-})
+// test('opts.stacks', ({is, ok, end}) => {
+//   check([
+//     (s) => {
+//       const {phase, stack} = parse(s)
+//       is(phase, 'init')
+//       ok(stack)
+//       end()
+//     }
+//   ])
+//   process.nextTick(() => {
+//     setTimeout(() => {})
+//   })
+// })
 
-test('opts.context', ({is, ok, end}) => {
-  check([
-    (s) => {
-      const {phase, ctx} = parse(s)
-      is(phase, 'pre')
-      ok(ctx)
-    },
-    (s) => {
-      const {phase, ctx} = parse(s)
-      is(phase, 'post')
-      ok(ctx)
-      end()
-    }
-  ])
-  process.nextTick(() => {
-    setTimeout(() => {})
-  })
-})
+// test('opts.context', ({is, ok, end}) => {
+//   check([
+//     (s) => {
+//       const {phase, ctx} = parse(s)
+//       is(phase, 'pre')
+//       ok(ctx)
+//     },
+//     (s) => {
+//       const {phase, ctx} = parse(s)
+//       is(phase, 'post')
+//       ok(ctx)
+//       end()
+//     }
+//   ])
+//   process.nextTick(() => {
+//     setTimeout(() => {})
+//   })
+// })
 
