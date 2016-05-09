@@ -28,7 +28,9 @@
   "homepage": "https://github.com/davidmarkclements/async-tracer#readme",
   "dependencies": {
     "fast-safe-stringify": "^1.0.9",
+    "flatstr": "^1.0.3",
     "json-stringify-safe": "^5.0.1",
-    "quick-format": "^2.0.4"
+    "quick-format": "^2.0.4",
+    "reusify": "^1.0.1"
   }
 }

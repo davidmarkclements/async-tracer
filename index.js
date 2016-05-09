@@ -6,6 +6,7 @@ var mappings = Object.keys(wrap.Providers)
     o[wrap.Providers[k]] = k.replace('WRAP', '')
     return o
   }, {})
+var flatstr = require('flatstr')
 var areaMap = [
   'misc', 'crypto', 'fs', 'fs', 'dns', 'dns', 'http', 'stream', 'stream', 'stream',
   'process', 'dns', 'stream', 'process', 'fs', 'net', 'net', 'timers', 'tls', 'tty',
@@ -58,7 +59,7 @@ module.exports = function (f, opts) {
   var ops = new Map()
   var enable = function () { wrap.enable() }
   var disable = function () { wrap.disable() }
-
+  disable()
   try {
     wrap.setupHooks({init: init, pre: pre, post: post, destroy: destroy})
   } catch (e) {
@@ -69,22 +70,20 @@ module.exports = function (f, opts) {
 
   if (autostart) { enable() }
 
+  function write (s) {
+    process.nextTick(function (s) {
+      disable()
+      if (f.pipe && f.cork) {
+        f.write(flatstr(s), enable)
+      } else {
+        fs.write(f, flatstr(s), enable)
+      }
+    }, s)
+  }
+
   return {
     enable: enable,
     disable: disable
-  }
-
-  function write (s) {
-    if (f.uncork) { f.uncork() }
-    process.nextTick(function () {
-      disable()
-      if (f.pipe && f.cork) {
-        f.cork()
-        f.write(s, enable)
-      } else {
-        fs.write(f, s + '', enable)
-      }
-    })
   }
 
   function init (uid, provider, parentUid, parentHandle) {
@@ -93,7 +92,6 @@ module.exports = function (f, opts) {
       provider = uid
       uid = this._legacy_uid
     }
-
     var op = mappings[provider]
     var area = areaMap[provider]
     var ctx = contexts ? this : null
