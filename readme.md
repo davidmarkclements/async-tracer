@@ -95,7 +95,7 @@ The context is an exposed C object that holds state for the async op.
 
 ## Benchmarks
 
-Overhead of using `async-tracer` is minimal
+Overhead of using `async-tracer` is about 25%.
 
 ```sh
 npm run benchmark
@@ -106,12 +106,10 @@ npm run benchmark
 Running 10s test @ http://localhost:3000
 10 connections with 10 pipelining factor
 
-Stat         Avg     Stdev     Max
-Latency (ms) 0.19    0.59      33
-Req/Sec      41901.1 1519.89   42815
-Bytes/Sec    4.64 MB 203.09 kB 4.98 MB
-
-4610k requests in 10s, 51.16 MB read
+Stat         Avg      Stdev     Max
+Latency (ms) 0.23     0.8       54
+Req/Sec      33283.64 2291.73   35135
+Bytes/Sec    3.7 MB   250.51 kB 3.93 MB
 ```
 
 ### Without tracing
@@ -120,12 +118,14 @@ Running 10s test @ http://localhost:3000
 10 connections with 10 pipelining factor
 
 Stat         Avg      Stdev     Max
-Latency (ms) 0.17     0.55      38
-Req/Sec      42968.73 1667.7    44351
-Bytes/Sec    4.75 MB  168.51 kB 4.98 MB
-
-4730k requests in 10s, 52.46 MB read
+Latency (ms) 0.13     0.44      33
+Req/Sec      45426.91 1279.75   46303
+Bytes/Sec    5.06 MB  150.72 kB 5.24 MB
 ```
+
+Overhead of turning on tracing with `async_wrap`
+is around 8%, so the net overhead is 17%, mostly
+this is the cost of writing to a stream.
 
 ### Benchmarking Options
 
