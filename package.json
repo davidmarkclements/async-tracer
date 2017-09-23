@@ -1,6 +1,6 @@
 {
   "name": "async-tracer",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Trace all async operations, output as newline delimited JSON logs, with minimal overhead.",
   "main": "index.js",
   "scripts": {
@@ -33,5 +33,7 @@
     "quick-format": "^2.0.4",
     "reusify": "^1.0.1"
   },
-  "engines" : { "node" : ">=4 <8" }
+  "engines": {
+    "node": ">=4 <8"
+  }
 }
