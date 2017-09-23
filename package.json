@@ -32,5 +32,6 @@
     "json-stringify-safe": "^5.0.1",
     "quick-format": "^2.0.4",
     "reusify": "^1.0.1"
-  }
+  },
+  "engines" : { "node" : ">=4 <8" }
 }
